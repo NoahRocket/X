@@ -45,7 +45,7 @@ const Feed = ({ session }) => {
       setLoading(true);
       
       // Fetch posts with user details and likes count
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('posts')
         .select(`
           *,
@@ -75,7 +75,7 @@ const Feed = ({ session }) => {
     if (!session) return;
     
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('users')
         .select('questions_asked_today, last_question_date')
         .eq('id', session.user.id)
@@ -128,7 +128,7 @@ const Feed = ({ session }) => {
       const response = aiResult.data;
 
       // Create post in database
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('posts')
         .insert([{
           user_id: session.user.id,
