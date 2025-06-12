@@ -38,14 +38,14 @@ const Feed = ({ session }) => {
     if (session) {
       checkRemainingQuestions();
     }
-  }, [session]);
+  }, [session, checkRemainingQuestions]);
 
   const fetchPosts = async () => {
     try {
       setLoading(true);
       
       // Fetch posts with user details and likes count
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('posts')
         .select(`
           *,
@@ -75,7 +75,7 @@ const Feed = ({ session }) => {
     if (!session) return;
     
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('users')
         .select('questions_asked_today, last_question_date')
         .eq('id', session.user.id)
@@ -89,9 +89,9 @@ const Feed = ({ session }) => {
       const today = new Date();
       
       if (lastQuestionDate && 
-          lastQuestionDate.getDate() !== today.getDate() || 
+          (lastQuestionDate.getDate() !== today.getDate() || 
           lastQuestionDate.getMonth() !== today.getMonth() ||
-          lastQuestionDate.getFullYear() !== today.getFullYear()) {
+          lastQuestionDate.getFullYear() !== today.getFullYear())) {
         // Reset the count if last question was not from today
         questionsAskedToday = 0;
         
@@ -128,7 +128,7 @@ const Feed = ({ session }) => {
       const response = aiResult.data;
 
       // Create post in database
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('posts')
         .insert([{
           user_id: session.user.id,
