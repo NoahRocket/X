@@ -11,7 +11,7 @@
   width: 100%;
   min-height: 120px;
   padding: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 15px; /* This provides space above the form-footer */
   background-color: #000000;
   color: #ffffff;
   border: 1px solid #ffffff;
@@ -19,6 +19,7 @@
   resize: vertical;
 }
 
+/* General button style within the question form */
 .question-form-container button {
   width: 100%;
   padding: 10px;
@@ -38,12 +39,27 @@
   cursor: not-allowed;
 }
 
-.questions-remaining {
-  margin-bottom: 15px;
-  color: #aaaaaa;
-  font-size: 14px;
+/* Styles for the new form footer layout */
+.form-footer {
+  display: flex;
+  justify-content: space-between; /* Counter on left, button on right */
+  align-items: center;
 }
 
-.limit-reached {
-  color: #ff6b6b;
+.char-counter {
+  font-size: 0.9em;
+  color: #aaaaaa; /* Light grey for normal state */
+  margin-right: 15px; /* Space between counter and button */
+}
+
+.char-counter.over-limit {
+  color: #ff6b6b; /* Red color when character limit is exceeded */
+  font-weight: bold;
+}
+
+/* Specific style adjustments for the button when it's inside .form-footer */
+.form-footer button {
+  width: auto; /* Override the general 100% width */
+  padding: 10px 20px; /* Adjust padding for a non-full-width button */
+  flex-shrink: 0; /* Prevent button from shrinking if counter text gets long */
 }

@@ -1,45 +1,63 @@
 import React, { useState } from 'react';
 import '../styles/QuestionForm.css';
 
-const QuestionForm = ({ onSubmit, loading, remainingQuestions }) => {
+const QuestionForm = ({ onSubmit, loading }) => {
   const [question, setQuestion] = useState('');
+  const MAX_CHARS = 140;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!question.trim()) return;
-    
+  const handleInputChange = (e) => {
+    setQuestion(e.target.value);
+  };
+
+  const currentChars = question.length;
+  const canSubmit = !loading && question.trim().length > 0 && currentChars <= MAX_CHARS;
+
+  const performSubmit = () => {
+    if (!canSubmit) return;
     onSubmit(question);
     setQuestion('');
+  };
+
+  const handleSubmitForm = (e) => {
+    e.preventDefault();
+    performSubmit();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevent newline in textarea
+      performSubmit();
+    }
   };
 
   return (
     <div className="question-form-container">
       <h2>ASK A QUESTION</h2>
-      
-      {typeof remainingQuestions === 'number' && (
-        <div className="questions-remaining">
-          {remainingQuestions > 0 ? (
-            <span>{remainingQuestions} questions remaining today</span>
-          ) : (
-            <span className="limit-reached">Daily limit reached. Try again tomorrow.</span>
-          )}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmitForm}>
         <textarea
           value={question}
-          onChange={(e) => setQuestion(e.target.value)}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           placeholder="What would you like to know?"
-          disabled={loading || remainingQuestions === 0}
+          disabled={loading}
           required
+          maxLength={MAX_CHARS}
+          aria-describedby="char-counter-info" // For accessibility
         />
-        <button 
-          type="submit" 
-          disabled={loading || !question.trim() || remainingQuestions === 0}
-        >
-          {loading ? 'Sending...' : 'Submit'}
-        </button>
+        <div className="form-footer"> {/* Wrapper for counter and button */}
+          <div 
+            id="char-counter-info" // For accessibility
+            className={`char-counter ${currentChars > MAX_CHARS ? 'over-limit' : ''}`}
+          >
+            {currentChars}/{MAX_CHARS}
+          </div>
+          <button 
+            type="submit" 
+            disabled={!canSubmit}
+          >
+            {loading ? 'Sending...' : 'Submit'}
+          </button>
+        </div>
       </form>
     </div>
   );
