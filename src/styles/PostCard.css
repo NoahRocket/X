@@ -1,0 +1,78 @@
+.post-card {
+  border: 1px solid #ffffff;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #000000;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #333333;
+}
+
+.post-user {
+  font-weight: bold;
+}
+
+.post-time {
+  color: #aaaaaa;
+  font-size: 14px;
+}
+
+.post-question {
+  font-size: 18px;
+  margin-bottom: 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.post-response {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #111111;
+  border-left: 2px solid #ffffff;
+}
+
+.response-label {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #aaaaaa;
+}
+
+.response-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.post-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.like-button {
+  background: none;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  padding: 5px 15px;
+  cursor: pointer;
+  width: auto;
+  transition: all 0.3s;
+}
+
+.like-button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.like-button.liked {
+  background-color: rgba(255, 105, 97, 0.3);
+  border-color: #ff6961;
+  color: #ff6961;
+}
+
+.like-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

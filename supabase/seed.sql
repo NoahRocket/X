@@ -1,0 +1,12 @@
+-- This file contains sample data for the Intellectus platform
+-- Use this to populate your database with initial content for testing
+
+-- Insert sample posts (you would replace the user_id with actual user IDs from your system)
+INSERT INTO public.posts (user_id, question, response, created_at)
+VALUES 
+  ('00000000-0000-0000-0000-000000000000', 'What is artificial intelligence?', 'Artificial Intelligence (AI) refers to computer systems designed to perform tasks that typically require human intelligence. These include learning, reasoning, problem-solving, perception, and language understanding. AI systems are trained on vast amounts of data and use algorithms to identify patterns, make predictions, and improve over time through experience.', '2025-06-10T10:00:00Z'),
+  ('00000000-0000-0000-0000-000000000000', 'How does machine learning differ from traditional programming?', 'In traditional programming, developers write explicit instructions (code) that tell a computer exactly what to do in different situations. The program follows these instructions precisely.\n\nIn machine learning, instead of writing specific instructions, developers create models that learn patterns from data. The system is trained on examples and then makes predictions or decisions based on what it has learned, without being explicitly programmed for each specific scenario. It improves its performance through experience.', '2025-06-10T11:30:00Z'),
+  ('00000000-0000-0000-0000-000000000000', 'What books would you recommend for understanding philosophy?', 'For understanding philosophy, I would recommend starting with these accessible yet profound works:\n\n1. "Sophie''s World" by Jostein Gaarder - A novel that doubles as an engaging history of philosophy\n2. "The Republic" by Plato - A foundational text exploring justice, governance, and reality\n3. "Meditations" by Marcus Aurelius - Stoic philosophy in practice from a Roman Emperor\n4. "Beyond Good and Evil" by Friedrich Nietzsche - A challenging but rewarding examination of morality\n5. "The Stranger" by Albert Camus - An exploration of existentialism through fiction\n\nAs you progress, you might explore works by Kant, Hume, Sartre, and contemporary philosophers like Peter Singer or Martha Nussbaum.', '2025-06-10T14:45:00Z');
+
+-- Note: In a real application, you would need to replace the user_id values with actual user IDs
+-- The sample data above uses a placeholder UUID that you should replace

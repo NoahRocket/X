@@ -1,0 +1,49 @@
+.navbar {
+  background-color: #000000;
+  border-bottom: 1px solid #ffffff;
+  padding: 15px 0;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.navbar-logo {
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-link, .navbar-button {
+  margin-left: 20px;
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.navbar-link:hover {
+  text-decoration: underline;
+}
+
+.navbar-button {
+  background: none;
+  border: 1px solid #ffffff;
+  padding: 5px 10px;
+  width: auto;
+}
+
+.navbar-username {
+  margin-left: 20px;
+  color: #aaaaaa;
+}

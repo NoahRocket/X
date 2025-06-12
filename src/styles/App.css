@@ -1,0 +1,121 @@
+/* App Container */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main content */
+main {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Loading screen */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+/* Form Elements */
+input, textarea, button {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 10px;
+  margin: 10px 0;
+  width: 100%;
+}
+
+button {
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #333;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Container for forms */
+.form-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ffffff;
+}
+
+.form-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-error {
+  color: #ff6b6b;
+  margin: 10px 0;
+}
+
+/* Links */
+.link {
+  color: #ffffff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Card design for posts */
+.card {
+  border: 1px solid #ffffff;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.card-content {
+  margin-bottom: 15px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #000000;
+  border: 1px solid #ffffff;
+  padding: 20px;
+  max-width: 500px;
+  width: 100%;
+}

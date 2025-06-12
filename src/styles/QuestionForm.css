@@ -1,0 +1,49 @@
+.question-form-container {
+  width: 100%;
+}
+
+.question-form-container h2 {
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+}
+
+.question-form-container textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  font-family: 'Courier New', Courier, monospace;
+  resize: vertical;
+}
+
+.question-form-container button {
+  width: 100%;
+  padding: 10px;
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.question-form-container button:hover:not(:disabled) {
+  background-color: #333333;
+}
+
+.question-form-container button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.questions-remaining {
+  margin-bottom: 15px;
+  color: #aaaaaa;
+  font-size: 14px;
+}
+
+.limit-reached {
+  color: #ff6b6b;
+}

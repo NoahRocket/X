@@ -1,0 +1,46 @@
+.feed-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ffffff;
+}
+
+.feed-header h1 {
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+.feed-header button {
+  width: auto;
+  padding: 5px 15px;
+}
+
+.question-section {
+  margin-bottom: 40px;
+  padding: 20px;
+  border: 1px solid #ffffff;
+}
+
+.posts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loading-message, .empty-feed {
+  text-align: center;
+  padding: 40px;
+  color: #aaaaaa;
+}
+
+.error-message {
+  color: #ff6b6b;
+  margin: 10px 0;
+}
