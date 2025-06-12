@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { generateAIResponse } from '../utils/openaiClient';
 import QuestionForm from '../components/QuestionForm';
@@ -11,7 +11,39 @@ const Feed = ({ session }) => {
   const [error, setError] = useState(null);
   const [remainingQuestions, setRemainingQuestions] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
-  
+
+  // Hoisted function declaration to avoid temporal-dead-zone errors
+  async function fetchPosts() {
+    try {
+      setLoading(true);
+
+      // Fetch posts with user details and likes count
+      const { data, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          users:user_id (username),
+          likes:post_likes (count)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Format the posts data
+      const formattedPosts = data.map((post) => ({
+        ...post,
+        username: post.users?.username || 'Anonymous',
+        like_count: post.likes.length > 0 ? post.likes[0].count : 0,
+      }));
+
+      setPosts(formattedPosts);
+    } catch (error) {
+      setError(`Error fetching posts: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // Fetch all posts
   useEffect(() => {
     fetchPosts();
@@ -33,47 +65,9 @@ const Feed = ({ session }) => {
     };
   }, []);
 
-  // Get remaining questions count if user is logged in
-  useEffect(() => {
-    if (session) {
-      checkRemainingQuestions();
-    }
-  }, [session, checkRemainingQuestions]);
-
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch posts with user details and likes count
-      const { data, error } = await supabase
-        .from('posts')
-        .select(`
-          *,
-          users:user_id (username),
-          likes:post_likes (count)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Format the posts data
-      const formattedPosts = data.map(post => ({
-        ...post,
-        username: post.users?.username || 'Anonymous',
-        like_count: post.likes.length > 0 ? post.likes[0].count : 0
-      }));
-
-      setPosts(formattedPosts);
-    } catch (error) {
-      setError(`Error fetching posts: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const checkRemainingQuestions = async () => {
+  // Callback to check remaining questions, stable across renders
+  const checkRemainingQuestions = useCallback(async () => {
     if (!session) return;
-    
     try {
       const { data, error } = await supabase
         .from('users')
@@ -87,20 +81,22 @@ const Feed = ({ session }) => {
       let questionsAskedToday = data.questions_asked_today || 0;
       const lastQuestionDate = data.last_question_date ? new Date(data.last_question_date) : null;
       const today = new Date();
-      
-      if (lastQuestionDate && 
-          (lastQuestionDate.getDate() !== today.getDate() || 
+
+      if (
+        lastQuestionDate &&
+        (lastQuestionDate.getDate() !== today.getDate() ||
           lastQuestionDate.getMonth() !== today.getMonth() ||
-          lastQuestionDate.getFullYear() !== today.getFullYear())) {
+          lastQuestionDate.getFullYear() !== today.getFullYear())
+      ) {
         // Reset the count if last question was not from today
         questionsAskedToday = 0;
-        
+
         // Update the database
         await supabase
           .from('users')
           .update({
             questions_asked_today: 0,
-            last_question_date: null
+            last_question_date: null,
           })
           .eq('id', session.user.id);
       }
@@ -109,7 +105,14 @@ const Feed = ({ session }) => {
     } catch (error) {
       console.error('Error checking remaining questions:', error);
     }
-  };
+  }, [session]);
+
+  // Get remaining questions count if user is logged in
+  useEffect(() => {
+    if (session) {
+      checkRemainingQuestions();
+    }
+  }, [session, checkRemainingQuestions]);
 
   const handleSubmitQuestion = async (question) => {
     if (!session) return;
@@ -128,7 +131,7 @@ const Feed = ({ session }) => {
       const response = aiResult.data;
 
       // Create post in database
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('posts')
         .insert([{
           user_id: session.user.id,
