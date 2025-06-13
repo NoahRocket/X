@@ -3,15 +3,15 @@
 }
 
 .question-form-container h2 {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   letter-spacing: 1px;
 }
 
 .question-form-container textarea {
   width: 100%;
-  min-height: 120px;
+  /* min-height: 120px; /* Removed to allow `rows` attribute to control height */
   padding: 10px;
-  margin-bottom: 15px; /* This provides space above the form-footer */
+  margin-bottom: 10px; /* This provides space above the form-footer */
   background-color: #000000;
   color: #ffffff;
   border: 1px solid #ffffff;

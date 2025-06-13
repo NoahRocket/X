@@ -55,11 +55,16 @@
 .like-button {
   background: none;
   border: 1px solid #ffffff;
-  color: #ffffff;
+  color: #ffffff; /* Number color: white by default */
   padding: 5px 15px;
   cursor: pointer;
   width: auto;
   transition: all 0.3s;
+}
+
+.like-button .heart-icon {
+  color: #E60023; /* Heart icon is always this red */
+  margin-right: 5px; /* Add a little space between heart and number */
 }
 
 .like-button:hover:not(:disabled) {
@@ -67,9 +72,10 @@
 }
 
 .like-button.liked {
-  background-color: rgba(255, 105, 97, 0.3);
-  border-color: #ff6961;
-  color: #ff6961;
+  background-color: rgba(230, 0, 35, 0.1); /* Subtle background tint of the new red */
+  border-color: #E60023; /* Border is the new red */
+  color: #E60023; /* Number color becomes the new red when liked */
+  /* The .heart-icon within .like-button.liked will inherit its red color, no need to re-specify */
 }
 
 .like-button:disabled {

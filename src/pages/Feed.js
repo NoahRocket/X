@@ -6,45 +6,84 @@ import PostCard from '../components/PostCard';
 import '../styles/Feed.css';
 
 const Feed = ({ session }) => {
+  console.log('Feed component render/re-render');
+  const [sortOrder, setSortOrder] = useState('newest'); // 'newest' or 'best'
+  console.log('Current sortOrder state:', sortOrder);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [remainingQuestions, setRemainingQuestions] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [userLikes, setUserLikes] = useState(new Set()); // Stores post IDs liked by the current user
 
-  // Hoisted function declaration to avoid temporal-dead-zone errors
-  async function fetchPosts() {
+  const fetchPosts = useCallback(async () => {
+    console.log('fetchPosts called with sortOrder:', sortOrder);
     try {
       setLoading(true);
 
-      // Fetch posts with user details and likes count
-      const { data, error } = await supabase
+      let query = supabase
         .from('posts')
         .select(`
           *,
           users:user_id (username),
-          likes:post_likes (count)
+          post_likes_agg:post_likes(count)
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      const { data: postsData, error: postsError } = await query;
+      // The console.log below that uses sortOrder already logs postsData, so we can comment this one out or ensure it uses postsData.
+      // console.log('Raw data from Supabase (initial fetch):', postsData);
+      if (postsError) throw postsError;
 
-      // Format the posts data
-      const formattedPosts = data.map((post) => ({
+      // Fetch likes for the current user if logged in
+      let currentUserLikedPostIds = new Set();
+      if (session && session.user) {
+        const { data: likedPostsData, error: likedPostsError } = await supabase
+          .from('post_likes')
+          .select('post_id')
+          .eq('user_id', session.user.id);
+
+        if (likedPostsError) {
+          console.error('Error fetching user likes:', likedPostsError);
+        } else if (likedPostsData) {
+          likedPostsData.forEach(like => currentUserLikedPostIds.add(like.post_id));
+          setUserLikes(currentUserLikedPostIds); // Update state for optimistic updates
+        }
+      }
+      // console.log('Raw data from Supabase (default sort: newest):', postsData); // This was the first one, now corrected
+      console.log('Raw data from Supabase for sortOrder (' + sortOrder + '):', postsData); // Corrected to postsData
+
+      // Format the posts data, now including user_has_liked
+      const formattedPosts = postsData.map((post) => ({
         ...post,
         username: post.users?.username || 'Anonymous',
-        like_count: post.likes.length > 0 ? post.likes[0].count : 0,
+        // Access the count from the post_likes_agg object
+        like_count: post.post_likes_agg && post.post_likes_agg.length > 0 ? post.post_likes_agg[0].count : 0,
+        user_has_liked: currentUserLikedPostIds.has(post.id)
       }));
 
+      if (sortOrder === 'best') {
+        console.log('Applying client-side sort for "best"');
+        formattedPosts.sort((a, b) => {
+          // Sort by like_count descending
+          if (b.like_count !== a.like_count) {
+            return b.like_count - a.like_count;
+          }
+          // If like_counts are equal, sort by created_at descending (newer first)
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+      }
+      // For 'newest', it's already sorted by created_at desc by Supabase query
+
       setPosts(formattedPosts);
+      console.log('Formatted posts set to state for sortOrder (' + sortOrder + '):', formattedPosts);
     } catch (error) {
       setError(`Error fetching posts: ${error.message}`);
     } finally {
       setLoading(false);
     }
-  }
+  }, [sortOrder, session]); // Add session as a dependency for fetching user-specific likes
 
-  // Fetch all posts
   useEffect(() => {
     fetchPosts();
 
@@ -63,7 +102,7 @@ const Feed = ({ session }) => {
     return () => {
       supabase.removeChannel(postsSubscription);
     };
-  }, []);
+  }, [fetchPosts]); // fetchPosts is now a dependency
 
   // Callback to check remaining questions, stable across renders
   const checkRemainingQuestions = useCallback(async () => {
@@ -166,44 +205,77 @@ const Feed = ({ session }) => {
 
   const handleLike = async (postId) => {
     if (!session) return;
-    
-    try {
-      // Check if the user already liked this post
-      const { data: existingLike, error: likeCheckError } = await supabase
-        .from('post_likes')
-        .select('id')
-        .eq('post_id', postId)
-        .eq('user_id', session.user.id)
-        .single();
-      
-      if (likeCheckError && likeCheckError.code !== 'PGRST116') {
-        throw likeCheckError;
-      }
 
-      if (existingLike) {
-        // Unlike the post
+    const postIndex = posts.findIndex(p => p.id === postId);
+    if (postIndex === -1) {
+      console.error('Post not found for liking:', postId);
+      return;
+    }
+
+    const originalPost = posts[postIndex];
+    const isCurrentlyLiked = originalPost.user_has_liked;
+    const newLikeCount = isCurrentlyLiked ? originalPost.like_count - 1 : originalPost.like_count + 1;
+
+    // Optimistic UI update
+    setPosts(currentPosts =>
+      currentPosts.map(p =>
+        p.id === postId
+          ? { ...p, user_has_liked: !isCurrentlyLiked, like_count: newLikeCount }
+          : p
+      )
+    );
+    // Update userLikes set optimistically as well
+    setUserLikes(prevLikes => {
+      const newLikes = new Set(prevLikes);
+      if (isCurrentlyLiked) {
+        newLikes.delete(postId);
+      } else {
+        newLikes.add(postId);
+      }
+      return newLikes;
+    });
+
+    try {
+      if (isCurrentlyLiked) {
+        // User is unliking the post
         const { error: unlikeError } = await supabase
           .from('post_likes')
           .delete()
-          .eq('id', existingLike.id);
+          .eq('post_id', postId)
+          .eq('user_id', session.user.id);
 
         if (unlikeError) throw unlikeError;
       } else {
-        // Like the post
+        // User is liking the post
         const { error: likeError } = await supabase
           .from('post_likes')
-          .insert([{
-            post_id: postId,
-            user_id: session.user.id
-          }]);
+          .insert([{ post_id: postId, user_id: session.user.id }]);
 
         if (likeError) throw likeError;
       }
-
-      // Refresh the posts to update like count
-      fetchPosts();
+      // No need to call fetchPosts() here if optimistic update is sufficient and reliable.
+      // If you want to ensure data consistency by re-fetching after every like/unlike:
+      // fetchPosts(); 
     } catch (error) {
       setError(`Error liking post: ${error.message}`);
+      // Revert optimistic update on error
+      setPosts(currentPosts =>
+        currentPosts.map(p =>
+          p.id === postId
+            ? { ...originalPost } // Revert to original post state before optimistic update
+            : p
+        )
+      );
+      setUserLikes(prevLikes => {
+        const newLikes = new Set(prevLikes);
+        // Revert based on the action that failed
+        if (isCurrentlyLiked) { // Action was 'unlike', it failed, so post is still liked
+          newLikes.add(postId);
+        } else { // Action was 'like', it failed, so post is not liked
+          newLikes.delete(postId);
+        }
+        return newLikes;
+      });
     }
   };
 
@@ -222,9 +294,27 @@ const Feed = ({ session }) => {
 
       <div className="feed-header">
         <h1>FEED</h1>
-        <button onClick={fetchPosts} disabled={loading}>
+        <div className="feed-controls">
+          <div className="sort-options">
+            <button 
+              onClick={() => setSortOrder('newest')} 
+              className={sortOrder === 'newest' ? 'active' : ''}
+              disabled={loading}
+            >
+              Newest
+            </button>
+            <button 
+              onClick={() => setSortOrder('best')} 
+              className={sortOrder === 'best' ? 'active' : ''}
+              disabled={loading}
+            >
+              Best
+            </button>
+          </div>
+          <button onClick={fetchPosts} disabled={loading}>
           {loading ? 'Loading...' : 'Refresh'}
-        </button>
+          </button>
+        </div>
       </div>
       
       {loading ? (

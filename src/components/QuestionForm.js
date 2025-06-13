@@ -42,6 +42,7 @@ const QuestionForm = ({ onSubmit, loading }) => {
           disabled={loading}
           required
           maxLength={MAX_CHARS}
+          rows="3" // Set initial visible rows
           aria-describedby="char-counter-info" // For accessibility
         />
         <div className="form-footer"> {/* Wrapper for counter and button */}

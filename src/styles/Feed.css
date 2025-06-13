@@ -17,10 +17,8 @@
   letter-spacing: 2px;
 }
 
-.feed-header button {
-  width: auto;
-  padding: 5px 15px;
-}
+/* Original .feed-header button is replaced by the more detailed one below */
+
 
 .question-section {
   margin-bottom: 40px;
@@ -44,3 +42,51 @@
   color: #ff6b6b;
   margin: 10px 0;
 }
+
+/* --- Styles for Sort Controls --- */
+.feed-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.sort-options {
+  display: flex;
+  gap: 10px;
+}
+
+/* General style for buttons in feed-header, updated */
+.feed-header button {
+  width: auto;
+  padding: 5px 15px; /* Default for refresh button */
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: inherit; /* Ensures consistency */
+  font-size: inherit;   /* Ensures consistency */
+  line-height: normal; /* Prevents inconsistent button heights */
+  text-align: center;
+}
+
+/* Specific styling for sort buttons */
+.sort-options button {
+  padding: 5px 10px; /* Overrides general padding for sort buttons */
+  /* Other properties are inherited from .feed-header button */
+}
+
+/* Hover state for ALL buttons within .feed-header */
+.feed-header button:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Active state specifically for sort buttons */
+.sort-options button.active {
+  background-color: #ffffff; /* Same as hover, but could be different */
+  color: #000000;
+  font-weight: bold;
+}
+/* --- End of Styles for Sort Controls --- */
+

@@ -33,7 +33,7 @@ const PostCard = ({ post, isAuthenticated, onLike }) => {
           onClick={onLike}
           disabled={!isAuthenticated}
         >
-          ♥ {post.like_count}
+          <span className="heart-icon">♥</span> {post.like_count}
         </button>
       </div>
     </div>
