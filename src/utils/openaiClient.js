@@ -5,6 +5,39 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true // Note: In production, API calls should be made from a backend
 });
 
+export const generateTags = async (question) => {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-nano",
+      messages: [
+        {
+          role: "system",
+          content: "You are a tagging expert. Your task is to generate 2-3 relevant topics for a given question. The topics should be concise, lowercase, and separated by commas. For example, for the question 'How does quantum entanglement work?', you should return 'physics, quantum mechanics, technology'."
+        },
+        {
+          role: "user",
+          content: question
+        }
+      ],
+      temperature: 0.5,
+      max_tokens: 20
+    });
+
+    const tags = response.choices[0].message.content.split(',').map(tag => tag.trim());
+
+    return {
+      success: true,
+      data: tags
+    };
+  } catch (error) {
+    console.error("Error generating tags:", error);
+    return {
+      success: false,
+      error: "Failed to generate tags. Please try again later."
+    };
+  }
+};
+
 export const generateAIResponse = async (question) => {
   try {
     const response = await openai.chat.completions.create({

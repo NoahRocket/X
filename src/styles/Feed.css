@@ -14,10 +14,9 @@
 
 .feed-header h1 {
   margin: 0;
+  font-size: 1.5rem;
   letter-spacing: 2px;
 }
-
-/* Original .feed-header button is replaced by the more detailed one below */
 
 
 .question-section {
@@ -89,4 +88,39 @@
   font-weight: bold;
 }
 /* --- End of Styles for Sort Controls --- */
+
+.active-filter-container {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.active-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #ffffff;
+  color: #000000;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.clear-filter-btn {
+  background: none;
+  border: none;
+  color: #000000;
+  font-size: 1.4em;
+  font-weight: bold;
+  margin-left: 8px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.clear-filter-btn:hover {
+  opacity: 1;
+}
 

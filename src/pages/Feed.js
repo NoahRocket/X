@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { generateAIResponse } from '../utils/openaiClient';
+import { generateAIResponse, generateTags } from '../utils/openaiClient';
 import QuestionForm from '../components/QuestionForm';
 import PostCard from '../components/PostCard';
 import '../styles/Feed.css';
@@ -15,6 +15,7 @@ const Feed = ({ session }) => {
   const [remainingQuestions, setRemainingQuestions] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [userLikes, setUserLikes] = useState(new Set()); // Stores post IDs liked by the current user
+  const [selectedTag, setSelectedTag] = useState(null);
 
   const fetchPosts = useCallback(async () => {
     console.log('fetchPosts called with sortOrder:', sortOrder);
@@ -154,33 +155,57 @@ const Feed = ({ session }) => {
   }, [session, checkRemainingQuestions]);
 
   const handleSubmitQuestion = async (question) => {
-    if (!session) return;
+    if (!session) {
+      setError('You must be logged in to post a question.');
+      return;
+    }
     if (!question.trim()) return;
-    
+
+    setSubmitLoading(true);
+    setError(null);
+
     try {
-      setSubmitLoading(true);
-      
-      // Generate AI response
-      const aiResult = await generateAIResponse(question);
-      
+      // Generate AI response and tags in parallel
+      const [aiResult, tagsResult] = await Promise.all([
+        generateAIResponse(question),
+        generateTags(question)
+      ]);
+
       if (!aiResult.success) {
         throw new Error(aiResult.error);
       }
-      
-      const response = aiResult.data;
 
-      // Create post in database
-      const { error } = await supabase
+      if (!tagsResult.success) {
+        console.error('Could not generate tags:', tagsResult.error);
+        // We can still proceed without tags
+      }
+
+      const response = aiResult.data;
+      const tags = tagsResult.success ? tagsResult.data : [];
+
+      // Create post in the database
+      const { data: newPost, error } = await supabase
         .from('posts')
         .insert([{
           user_id: session.user.id,
           question,
           response,
+          tags, // Add tags to the insert object
           created_at: new Date().toISOString()
         }])
-        .select();
+        .select('*, users:user_id (username)')
+        .single();
 
       if (error) throw error;
+
+      // Optimistically update the UI
+      const formattedPost = {
+        ...newPost,
+        username: newPost.users?.username || 'Anonymous',
+        like_count: 0,
+        user_has_liked: false,
+      };
+      setPosts(prevPosts => [formattedPost, ...prevPosts]);
 
       // Update user's daily question count
       await supabase
@@ -193,13 +218,24 @@ const Feed = ({ session }) => {
 
       // Update the remaining questions count
       checkRemainingQuestions();
-      
-      // Refresh the feed
-      fetchPosts();
+
     } catch (error) {
       setError(`Error submitting question: ${error.message}`);
     } finally {
       setSubmitLoading(false);
+    }
+  };
+
+  const filteredPosts = useMemo(() => {
+    if (!selectedTag) return posts;
+    return posts.filter(post => post.tags && post.tags.includes(selectedTag));
+  }, [posts, selectedTag]);
+
+  const handleTagClick = (tag) => {
+    if (selectedTag === tag) {
+      setSelectedTag(null); // Unselect if the same tag is clicked again
+    } else {
+      setSelectedTag(tag);
     }
   };
 
@@ -316,17 +352,29 @@ const Feed = ({ session }) => {
           </button>
         </div>
       </div>
+
+      {selectedTag && (
+        <div className="active-filter-container">
+          <div className="active-filter-tag">
+            {selectedTag}
+            <button onClick={() => setSelectedTag(null)} className="clear-filter-btn">
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
       
       {loading ? (
         <div className="loading-message">Loading posts...</div>
-      ) : posts.length > 0 ? (
+      ) : filteredPosts.length > 0 ? (
         <div className="posts-container">
-          {posts.map((post) => (
+          {filteredPosts.map((post) => (
             <PostCard
               key={post.id}
               post={post}
               isAuthenticated={!!session}
               onLike={() => handleLike(post.id)}
+              onTagClick={handleTagClick}
             />
           ))}
         </div>

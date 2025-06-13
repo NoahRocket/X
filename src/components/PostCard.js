@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/PostCard.css';
 
-const PostCard = ({ post, isAuthenticated, onLike }) => {
+const PostCard = ({ post, isAuthenticated, onLike, onTagClick }) => {
   const formatDate = (dateString) => {
     const options = {
       year: 'numeric',
@@ -26,6 +26,14 @@ const PostCard = ({ post, isAuthenticated, onLike }) => {
         <div className="response-label">AI RESPONSE:</div>
         <div className="response-content">{post.response}</div>
       </div>
+
+      {post.tags && post.tags.length > 0 && (
+        <div className="post-tags">
+          {post.tags.map((tag, index) => (
+            <span key={index} className="tag" onClick={() => onTagClick(tag)}>{tag}</span>
+          ))}
+        </div>
+      )}
       
       <div className="post-actions">
         <button 
