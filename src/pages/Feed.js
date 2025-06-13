@@ -14,6 +14,7 @@ const Feed = ({ session }) => {
   const [error, setError] = useState(null);
   const [remainingQuestions, setRemainingQuestions] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [userLikes, setUserLikes] = useState(new Set()); // Stores post IDs liked by the current user
   const [selectedTag, setSelectedTag] = useState(null);
 
