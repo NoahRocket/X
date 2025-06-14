@@ -156,8 +156,9 @@ const Feed = ({ session }) => {
   }, [session, checkRemainingQuestions]);
 
   const handleSubmitQuestion = async (question) => {
-    if (!session) {
-      setError('You must be logged in to post a question.');
+    if (!session || !session.user || !session.user.id) {
+      console.error('handleSubmitQuestion: Attempted to submit question without a valid session, user, or user ID.', session);
+      setError('Authentication error. Please log out and log back in to post a question.');
       return;
     }
     if (!question.trim()) return;
